@@ -26,23 +26,18 @@ public class HuffmanDecoder {
 
     public void getOriginalCodes(TreeNode root)
     {
-        InOrderTraversal(root, new StringBuilder());
+        preOrderTraversal(root, new StringBuilder());
     }
 
-    public void InOrderTraversal(TreeNode root, StringBuilder code)
+    public void preOrderTraversal(TreeNode root, StringBuilder code)
     {
         if (root.isLeaf())
         {
             originalBytes.put(code.toString(), root.getCharacter());
-            if (code.length() != 0)
-                code.deleteCharAt(code.length() - 1);
             return;
         }
 
-        InOrderTraversal(root.getLeft(), code.append("0"));
-        InOrderTraversal(root.getRight(), code.append("1"));
-
-        if (code.length() != 0)
-            code.deleteCharAt(code.length() - 1);
+        preOrderTraversal(root.getLeft(), new StringBuilder(code).append("0"));
+        preOrderTraversal(root.getRight(), new StringBuilder(code).append("1"));
     }
 }
