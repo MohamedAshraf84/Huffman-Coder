@@ -7,7 +7,6 @@ import com.mohamed13ashraf.huffmancoder.MyDataStructures.MinimumHeap;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.BitSet;
 
 public class HuffmanEncoder {
     private final FileInputStream fileReader;
@@ -116,31 +115,6 @@ public class HuffmanEncoder {
 
         return charsFrequencyPQ.poll();
     }
-
-
-    private StringBuilder constructMessageBitSequence(AVLMap<Byte, String> byteCodes) {
-        StringBuilder messageBitSequence = new StringBuilder();
-        SinglyLinkedList<Byte> messageCharacters = getMessageCharacters();
-
-        for (byte aChar : messageCharacters)
-            messageBitSequence.append(byteCodes.get(aChar));
-
-        return messageBitSequence;
-    }
-
-    private BitSet convertToBitSet(StringBuilder messageBitSequence) {
-        int encodedMessageLength = messageBitSequence.length();
-        BitSet encodedMessage = new BitSet(encodedMessageLength);
-
-        for (int i = 0; i < encodedMessageLength; ++i) {
-            if (messageBitSequence.charAt(i) == '1') {
-                encodedMessage.set(i);
-            }
-        }
-        return encodedMessage;
-    }
-
-
 
     public AVLMap<Byte, Integer> getFrequencyTable()
     {

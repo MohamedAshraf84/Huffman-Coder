@@ -269,11 +269,11 @@ public class HuffmanCoderController implements Initializable {
             ObjectInputStream obj = new ObjectInputStream(out);
 
             HuffmanResult huffmanResult = (HuffmanResult) obj.readObject();
-            int encodedMessageLength = huffmanResult.getEncodedMessageLength();
-            BitSet encodedMessage = huffmanResult.getEncodedMessage();
+            int encodedMessageLength = huffmanResult.encodedMessageLength();
+            BitSet encodedMessage = huffmanResult.encodedMessage();
 
             HuffmanDecoder huffmanDecoder =
-                    new HuffmanDecoder(huffmanResult.getHuffmanTree());
+                    new HuffmanDecoder(huffmanResult.huffmanTree());
 
             AVLMap<String, Byte> originalBytes = huffmanDecoder.decode();
 
