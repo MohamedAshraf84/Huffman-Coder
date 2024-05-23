@@ -493,17 +493,17 @@ public class HuffmanCoderController implements Initializable {
         int NODE_RADIUS = 15;
         Circle circle = new Circle(x, y, NODE_RADIUS, NON_LEAF_NODE_COLOR);
 
-        Text text = new Text(String.valueOf(node.getFrequency()));
+        Text text = new Text(String.valueOf(node.frequency()));
 
         if (node.isLeaf()) {
             circle = new Circle(x, y, NODE_RADIUS, LEAF_NODE_COLOR);
             circle.setStroke(Color.GREEN);
-            text.setText(String.valueOf((char) node.getCharacter()));
-            if (node.getCharacter() == 13) {
+            text.setText(String.valueOf((char) node.character()));
+            if (node.character() == 13) {
                 text.setText("CR");
-            } else if (node.getCharacter() == 10) {
+            } else if (node.character() == 10) {
                 text.setText("LF");
-            } else if (node.getCharacter() == 32) {
+            } else if (node.character() == 32) {
                 text.setText("SP");
             }
         }
@@ -517,7 +517,7 @@ public class HuffmanCoderController implements Initializable {
         pane.getChildren().addAll(circle, text);
 
         int LEVEL_HEIGHT = 80;
-        if (node.getLeft() != null) {
+        if (node.left() != null) {
 
             double leftX = x - hGap / (Math.pow(2, level + 1));
             double leftY = y + LEVEL_HEIGHT;
@@ -528,10 +528,10 @@ public class HuffmanCoderController implements Initializable {
             zero.setY(y + NODE_RADIUS + (leftY - 2 * NODE_RADIUS - y) / 2);
             line.setStroke(LINE_COLOR);
             pane.getChildren().addAll(line, zero);
-            drawTree(pane, node.getLeft(), leftX, leftY, hGap, level + 1);
+            drawTree(pane, node.left(), leftX, leftY, hGap, level + 1);
         }
 
-        if (node.getRight() != null) {
+        if (node.right() != null) {
 
             double rightX = x + hGap / (Math.pow(2, level + 1));
             double rightY = y + LEVEL_HEIGHT;
@@ -542,7 +542,7 @@ public class HuffmanCoderController implements Initializable {
             one.setY(y + NODE_RADIUS + (rightY - 2 * NODE_RADIUS - y) / 2);
             line.setStroke(LINE_COLOR);
             pane.getChildren().addAll(line, one);
-            drawTree(pane, node.getRight(), rightX, rightY, hGap, level + 1);
+            drawTree(pane, node.right(), rightX, rightY, hGap, level + 1);
 
         }
     }

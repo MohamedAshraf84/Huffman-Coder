@@ -33,11 +33,11 @@ public class HuffmanDecoder {
     {
         if (root.isLeaf())
         {
-            originalBytes.put(code.toString(), root.getCharacter());
+            originalBytes.put(code.toString(), root.character());
             return;
         }
 
-        preOrderTraversal(root.getLeft(), new StringBuilder(code).append("0"));
-        preOrderTraversal(root.getRight(), new StringBuilder(code).append("1"));
+        preOrderTraversal(root.left(), new StringBuilder(code).append("0"));
+        preOrderTraversal(root.right(), new StringBuilder(code).append("1"));
     }
 }

@@ -7,6 +7,7 @@ import com.mohamed13ashraf.huffmancoder.MyDataStructures.MinimumHeap;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.BitSet;
 
 public class HuffmanEncoder {
     private final FileInputStream fileReader;
@@ -55,12 +56,12 @@ public class HuffmanEncoder {
     {
         if (curNode.isLeaf())
         {
-            byteCodes.put(curNode.getCharacter(), binCode.toString());
+            byteCodes.put(curNode.character(), binCode.toString());
             return;
         }
 
-        preOrderTraversal(curNode.getLeft(), new StringBuilder(binCode).append("0"));
-        preOrderTraversal(curNode.getRight(), new StringBuilder(binCode).append("1"));
+        preOrderTraversal(curNode.left(), new StringBuilder(binCode).append("0"));
+        preOrderTraversal(curNode.right(), new StringBuilder(binCode).append("1"));
     }
 
     private SinglyLinkedList<Byte> readCharactersFromFile() throws IOException {
@@ -102,7 +103,7 @@ public class HuffmanEncoder {
     }
     private TreeNode mergeTwoTrees(TreeNode left, TreeNode right)
     {
-        return new TreeNode((byte) '\0', left.getFrequency() + right.getFrequency(), left, right);
+        return new TreeNode((byte) '\0', left.frequency() + right.frequency(), left, right);
     }
     private TreeNode buildHuffmanTree()
     {
@@ -115,6 +116,31 @@ public class HuffmanEncoder {
 
         return charsFrequencyPQ.poll();
     }
+
+
+    private StringBuilder constructMessageBitSequence(AVLMap<Byte, String> byteCodes) {
+        StringBuilder messageBitSequence = new StringBuilder();
+        SinglyLinkedList<Byte> messageCharacters = getMessageCharacters();
+
+        for (byte aChar : messageCharacters)
+            messageBitSequence.append(byteCodes.get(aChar));
+
+        return messageBitSequence;
+    }
+
+    private BitSet convertToBitSet(StringBuilder messageBitSequence) {
+        int encodedMessageLength = messageBitSequence.length();
+        BitSet encodedMessage = new BitSet(encodedMessageLength);
+
+        for (int i = 0; i < encodedMessageLength; ++i) {
+            if (messageBitSequence.charAt(i) == '1') {
+                encodedMessage.set(i);
+            }
+        }
+        return encodedMessage;
+    }
+
+
 
     public AVLMap<Byte, Integer> getFrequencyTable()
     {
