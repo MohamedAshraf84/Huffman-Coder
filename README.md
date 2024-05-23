@@ -33,6 +33,7 @@ with more frequent characters receiving shorter codes, thereby reducing the over
 * Windows:</br>
 Double-click the HuffmanCoder.exe file.</br>
 </br>
+
 * Using JAR File:<br>
 1. Open your terminal.<br>
 2. Navigate to the directory containing the Huffman-Coder.jar file.<br>
