@@ -55,19 +55,12 @@ public class HuffmanEncoder {
     {
         if (curNode.isLeaf())
         {
-            byteCodes.put(curNode .getCharacter(), binCode.toString());
-            if (binCode.length() != 0)
-                binCode.deleteCharAt(binCode.length() - 1);
-
+            byteCodes.put(curNode.getCharacter(), binCode.toString());
             return;
         }
 
-        preOrderTraversal(curNode.getLeft(), binCode.append("0"));
-        preOrderTraversal(curNode.getRight(), binCode.append("1"));
-
-        if (binCode.length() != 0)
-            binCode.deleteCharAt(binCode.length() - 1);
-
+        preOrderTraversal(curNode.getLeft(), new StringBuilder(binCode).append("0"));
+        preOrderTraversal(curNode.getRight(), new StringBuilder(binCode).append("1"));
     }
 
     private SinglyLinkedList<Byte> readCharactersFromFile() throws IOException {
