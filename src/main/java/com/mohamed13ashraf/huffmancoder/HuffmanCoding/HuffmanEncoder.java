@@ -14,7 +14,7 @@ public class HuffmanEncoder {
     private final AVLMap<Byte, Integer> charsFrequency;
     private final MinimumHeap<TreeNode> charsFrequencyPQ;
     private final TreeNode huffmanTree;
-    private final AVLMap<Byte, String> byteCodes;
+    private final AVLMap<Byte, String> huffmanCodes;
 
     public HuffmanEncoder(File source) {
         try {
@@ -26,10 +26,10 @@ public class HuffmanEncoder {
         charsFrequency = this.countCharactersFrequencies();
         charsFrequencyPQ = this.getCharactersPriorityQueue();
         huffmanTree = this.buildHuffmanTree();
-        byteCodes = new AVLMap<>();
+        huffmanCodes = new AVLMap<>();
     }
 
-    public SinglyLinkedList<Byte> getMessageCharacters()
+    private SinglyLinkedList<Byte> getMessageCharacters()
     {
         return messageCharacters;
     }
@@ -39,14 +39,13 @@ public class HuffmanEncoder {
         return huffmanTree;
     }
 
-    public AVLMap<Byte, String> encode()
+    public String encode()
     {
-        getByteCodes();
-
-        return byteCodes;
+        generateHuffmanCodes();
+        return encodeMessage();
     }
 
-    private void getByteCodes ()
+    private void generateHuffmanCodes()
     {
         preOrderTraversal(huffmanTree, new StringBuilder());
     }
@@ -55,7 +54,7 @@ public class HuffmanEncoder {
     {
         if (curNode.isLeaf())
         {
-            byteCodes.put(curNode.character(), binCode.toString());
+            huffmanCodes.put(curNode.character(), binCode.toString());
             return;
         }
 
@@ -72,6 +71,7 @@ public class HuffmanEncoder {
             oneByte = fileReader.readNBytes(1);
             charactersSequence.add(oneByte[0]);
         }
+
         return charactersSequence;
     }
     
@@ -100,10 +100,22 @@ public class HuffmanEncoder {
 
         return charsFrequencyPQ;
     }
+
+    private String encodeMessage() {
+        StringBuilder encodedMessageBitSequence = new StringBuilder();
+        SinglyLinkedList<Byte> messageCharacters = getMessageCharacters();
+
+        for (byte aChar : messageCharacters)
+            encodedMessageBitSequence.append(huffmanCodes.get(aChar));
+
+        return encodedMessageBitSequence.toString();
+    }
+
     private TreeNode mergeTwoTrees(TreeNode left, TreeNode right)
     {
         return new TreeNode((byte) '\0', left.frequency() + right.frequency(), left, right);
     }
+
     private TreeNode buildHuffmanTree()
     {
         while (charsFrequencyPQ.size() > 1)
@@ -121,8 +133,8 @@ public class HuffmanEncoder {
         return charsFrequency;
     }
 
-    public AVLMap<Byte, String> getBytesCode()
+    public AVLMap<Byte, String> getHuffmanCodes()
     {
-        return byteCodes;
+        return huffmanCodes;
     }
 }

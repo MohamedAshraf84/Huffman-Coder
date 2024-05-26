@@ -1,7 +1,6 @@
 package com.mohamed13ashraf.huffmancoder.HuffmanCoding;
 
 import com.mohamed13ashraf.huffmancoder.MyDataStructures.AVLMap;
-import com.mohamed13ashraf.huffmancoder.MyDataStructures.SinglyLinkedList;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -29,14 +28,6 @@ public class HuffmanCoderController implements Initializable {
     private final String NO_COMPRESSION_DONE_MESSAGE = "No compression have been done yet.";
     private final String CHOOSE_FILE_ALERT_MESSAGE = "Select a file first.";
     private final String SAVE_LOCATION_ALERT_MESSAGE = "Specify location to save the output file.";
-
-
-    private final String MESSAGE_STYLE =
-            "-fx-font-weight: bold;" +
-                    "-fx-alignment: center-left;" +
-                    "-fx-font-size: 17px;" +
-                    "-fx-padding: 20px 20px 20px 5px;";
-
     private final Color LEAF_NODE_COLOR = Color.rgb(237, 130, 14);
     private final Color NON_LEAF_NODE_COLOR = Color.LIGHTBLUE;
     private final Color LINE_COLOR = Color.BLACK;
@@ -68,7 +59,6 @@ public class HuffmanCoderController implements Initializable {
     private Stage stage;
     private HuffmanEncoder huffmanEncoder;
 
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
@@ -91,11 +81,9 @@ public class HuffmanCoderController implements Initializable {
         drawHuffmanTreeBtn.setOnMouseClicked(e -> drawHuffmanTree());
     }
 
-
     public void setStage(Stage stage) {
         this.stage = stage;
     }
-
 
     void init()
     {
@@ -109,7 +97,6 @@ public class HuffmanCoderController implements Initializable {
         decompressedFile = null;
     }
 
-
     void onCompressChosen() {
 
         init();
@@ -120,7 +107,6 @@ public class HuffmanCoderController implements Initializable {
         outputFilePathTF.setPromptText(OUTPUT_FILE_COMPRESSION_PROMPT_MESSAGE);
         runBtn.setText("RUN COMPRESSION");
     }
-
 
     void onDecompressChosen() {
         init();
@@ -188,7 +174,7 @@ public class HuffmanCoderController implements Initializable {
     public void compress()
     {
         if (fileToCompress == null) {
-            showAlertMessage("Message", CHOOSE_FILE_ALERT_MESSAGE, MESSAGE_STYLE);
+            showAlertMessage("Message", CHOOSE_FILE_ALERT_MESSAGE);
             return;
         }
 
@@ -196,51 +182,48 @@ public class HuffmanCoderController implements Initializable {
 
         if (hasBeenCompressed)
         {
-            showAlertMessage("Message", COMPRESSION_DONE_MESSAGE, MESSAGE_STYLE);
+            showAlertMessage("Message", COMPRESSION_DONE_MESSAGE);
             return;
         }
 
         if (outputFilePathTF.getText().isEmpty()) {
-            showAlertMessage("Message", SAVE_LOCATION_ALERT_MESSAGE, MESSAGE_STYLE);
+            showAlertMessage("Message", SAVE_LOCATION_ALERT_MESSAGE);
             return;
         }
 
         huffmanEncoder = new HuffmanEncoder(fileToCompress);
-        AVLMap<Byte, String> byteCodes = huffmanEncoder.encode();
 
-        StringBuilder messageBitSequence = new StringBuilder();
+        String encodedMessageBitSequence = huffmanEncoder.encode();
+        int encodedMessageLength = encodedMessageBitSequence.length();
 
-        SinglyLinkedList<Byte> messageCharacters = huffmanEncoder.getMessageCharacters();
+        BitSet encodedMessage = convertStringToBitSet(encodedMessageBitSequence);
 
-        for (byte aChar : messageCharacters)
-            messageBitSequence.append(byteCodes.get(aChar));
-
-        int encodedMessageLength = messageBitSequence.length();
-        BitSet encodedMessage = new BitSet(encodedMessageLength);
-
-        for (int i = 0; i < encodedMessageLength; ++i)
-            if (messageBitSequence.charAt(i) == '1')
-                encodedMessage.flip(i);
-
-        try {
-
-            FileOutputStream out = new FileOutputStream(compressedFile);
-            ObjectOutputStream obj = new ObjectOutputStream(out);
+        try ( FileOutputStream outputStream = new FileOutputStream(compressedFile);
+              ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream) ) {
 
             HuffmanResult huffmanResult = new HuffmanResult(encodedMessageLength, encodedMessage,
                     huffmanEncoder.getHuffmanTree());
-            obj.writeObject(huffmanResult);
 
-            out.close();
-            obj.close();
+            objectOutputStream.writeObject(huffmanResult);
 
             hasBeenCompressed = true;
-            showAlertMessage("Message", COMPRESSION_DONE_MESSAGE, MESSAGE_STYLE);
+            showAlertMessage("Message", COMPRESSION_DONE_MESSAGE);
 
         } catch (IOException e) {
-            showAlertMessage("Message", "Compression Failed." , MESSAGE_STYLE);
+            showAlertMessage("Message", "Compression Failed.");
         }
+    }
 
+    private BitSet convertStringToBitSet(String encodedMessageBitSequence) {
+        int encodedMessageLength = encodedMessageBitSequence.length();
+        BitSet encodedMessage = new BitSet(encodedMessageLength);
+
+        for (int i = 0; i < encodedMessageLength; ++i) {
+            if (encodedMessageBitSequence.charAt(i) == '1') {
+                encodedMessage.set(i);
+            }
+        }
+        return encodedMessage;
     }
 
     public void decompress() {
@@ -249,69 +232,36 @@ public class HuffmanCoderController implements Initializable {
 
         if (hasBeenDecompressed)
         {
-            showAlertMessage("Message", DECOMPRESSION_DONE_MESSAGE, MESSAGE_STYLE);
+            showAlertMessage("Message", DECOMPRESSION_DONE_MESSAGE);
             return;
         }
 
         if (fileToDecompress == null) {
-            showAlertMessage("Message", CHOOSE_FILE_ALERT_MESSAGE, MESSAGE_STYLE);
+            showAlertMessage("Message", CHOOSE_FILE_ALERT_MESSAGE);
             return;
         }
 
         if (outputFilePathTF.getText().isEmpty()) {
-            showAlertMessage("Message", SAVE_LOCATION_ALERT_MESSAGE, MESSAGE_STYLE);
+            showAlertMessage("Message", SAVE_LOCATION_ALERT_MESSAGE);
             return;
         }
 
-        try {
+        try ( FileInputStream inputStream = new FileInputStream(fileToDecompress.getAbsolutePath());
+              ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+              FileOutputStream outputFile = new FileOutputStream(decompressedFile) ) {
 
-            FileInputStream out = new FileInputStream(fileToDecompress.getAbsolutePath());
-            ObjectInputStream obj = new ObjectInputStream(out);
+            HuffmanResult huffmanResult = (HuffmanResult) objectInputStream.readObject();
+            HuffmanDecoder huffmanDecoder = new HuffmanDecoder(huffmanResult);
 
-            HuffmanResult huffmanResult = (HuffmanResult) obj.readObject();
-            int encodedMessageLength = huffmanResult.encodedMessageLength();
-            BitSet encodedMessage = huffmanResult.encodedMessage();
-
-            HuffmanDecoder huffmanDecoder =
-                    new HuffmanDecoder(huffmanResult.huffmanTree());
-
-            AVLMap<String, Byte> originalBytes = huffmanDecoder.decode();
-
-            StringBuilder originalSequence = new StringBuilder();
-            StringBuilder s = new StringBuilder();
-
-            for (int i = 0; i < encodedMessageLength; ++i)
-                s.append(encodedMessage.get(i) ? "1" : "0");
-
-            int currentLength = 1;
-            int start = 0;
-            while (start < encodedMessageLength) {
-                String key = s.substring(start, start + currentLength);
-                if (originalBytes.containsKey(key)) {
-                    byte ch = originalBytes.get(key);
-                    originalSequence.append((char) ch);
-                    start += currentLength;
-                    currentLength = 1;
-                    continue;
-                }
-                currentLength++;
-            }
-
-            FileOutputStream outputFile;
-
-            outputFile = new FileOutputStream(decompressedFile);
-            outputFile.write(originalSequence.toString().getBytes());
-
-            out.close();
-            obj.close();
+            String message = huffmanDecoder.decode();
+            outputFile.write(message.getBytes());
 
             hasBeenDecompressed = true;
-            showAlertMessage("Message", DECOMPRESSION_DONE_MESSAGE, MESSAGE_STYLE);
+            showAlertMessage("Message", DECOMPRESSION_DONE_MESSAGE);
 
         } catch (IndexOutOfBoundsException | IOException | ClassNotFoundException e) {
-            showAlertMessage("Message", "Decompression Failed." , MESSAGE_STYLE);
+            showAlertMessage("Message", "Decompression Failed.");
         }
-
     }
 
     public void showCompressionRatio() {
@@ -321,14 +271,11 @@ public class HuffmanCoderController implements Initializable {
             long b = compressedFile.length();
             double c = (a - b) / (double) a;
 
-            showAlertMessage("Compression Ratio", String.format("Compression done with %,.2f %%", c * 100.0),
-                    MESSAGE_STYLE);
+            showAlertMessage("Compression Ratio", String.format("Compression done with %,.2f %%", c * 100.0));
         } else {
-            showAlertMessage("Message", NO_COMPRESSION_DONE_MESSAGE, MESSAGE_STYLE);
+            showAlertMessage("Message", NO_COMPRESSION_DONE_MESSAGE);
         }
-
     }
-
 
     public void showSizeAfterCompression()
     {
@@ -341,11 +288,10 @@ public class HuffmanCoderController implements Initializable {
                             "%,d Bytes | " +
                                     "%,.2f KB | " +
                                     "%,.2f MB",
-                            fileSize, fileSize / 1024.0, fileSize / 1048576.0),
-                    MESSAGE_STYLE
+                            fileSize, fileSize / 1024.0, fileSize / 1048576.0)
             );
         } else {
-            showAlertMessage("Message", NO_COMPRESSION_DONE_MESSAGE, MESSAGE_STYLE);
+            showAlertMessage("Message", NO_COMPRESSION_DONE_MESSAGE);
         }
     }
 
@@ -358,105 +304,87 @@ public class HuffmanCoderController implements Initializable {
                     String.format("%,d Bytes | " +
                                     "%,.2f KB | " +
                                     "%,.2f MB",
-                            fileSize, fileSize / 1024.0, fileSize / 1048576.0),
-                    MESSAGE_STYLE);
+                            fileSize, fileSize / 1024.0, fileSize / 1048576.0)
+            );
         } else {
-            showAlertMessage("Message", CHOOSE_FILE_ALERT_MESSAGE, MESSAGE_STYLE);
+            showAlertMessage("Message", CHOOSE_FILE_ALERT_MESSAGE);
         }
-
     }
 
     public void showCodesBeforeCompression()
     {
 
         if (!hasBeenCompressed) {
-            showAlertMessage("Message", "Apply compression first.", MESSAGE_STYLE);
+            showAlertMessage("Message", "Apply compression first.");
             return;
         }
 
-        TableView<CodesTableRow> codesBeforeCompression = new TableView<>();
-        codesBeforeCompression.setMaxWidth(280);
-
-        TableColumn<CodesTableRow, String> characterColumn = new TableColumn<>("Character");
-        characterColumn.setCellValueFactory(
-                new PropertyValueFactory<>("character"));
-
-        TableColumn<CodesTableRow, String> frequencyColumn = new TableColumn<>("Frequency");
-        frequencyColumn.setCellValueFactory(
-                new PropertyValueFactory<>("frequency"));
-
-        TableColumn<CodesTableRow, String> bitSequenceColumn = new TableColumn<>("Bit Sequence");
-        bitSequenceColumn.setCellValueFactory(
-                new PropertyValueFactory<>("bitSequence"));
-
-        ObservableList<CodesTableRow> data =
-                FXCollections.observableArrayList();
+        TableView<CodesTableRow> codesBeforeCompression = createTableView();
+        ObservableList<CodesTableRow> data = FXCollections.observableArrayList();
 
         AVLMap<Byte, Integer> frequencyTable = huffmanEncoder.getFrequencyTable();
 
         for (AVLMap.AVLNode<Byte, Integer> entry : frequencyTable.entrySet()) {
             byte character = entry.getKey();
             String frequency = String.valueOf(entry.getValue());
-            String bitSequence = Integer.toBinaryString(character);
-            bitSequence = String.format("%" + (8) + "s", bitSequence).replace(' ', '0');
+            String bitSequence = String.format("%8s", Integer.toBinaryString(character & 0xFF))
+                                       .replace(' ', '0');
 
             data.add(new CodesTableRow((char) character, frequency, bitSequence));
         }
 
         codesBeforeCompression.setItems(data);
-        codesBeforeCompression.getColumns().addAll(characterColumn, frequencyColumn, bitSequenceColumn);
-
-        Stage originalCodesStage = new Stage();
-        originalCodesStage.setTitle("Original Codes");
-        //originalCodesStage.setWidth(280);
-        originalCodesStage.setResizable(false);
-        originalCodesStage.setScene(new Scene(new VBox(codesBeforeCompression)));
-        originalCodesStage.show();
+        showTableViewInStage(codesBeforeCompression, "Original Codes");
     }
 
     public void showCodesAfterCompression() {
 
         if (!hasBeenCompressed) {
-            showAlertMessage("Message", NO_COMPRESSION_DONE_MESSAGE, MESSAGE_STYLE);
+            showAlertMessage("Message", NO_COMPRESSION_DONE_MESSAGE);
             return;
         }
 
-        TableView<CodesTableRow> codesAfterCompression = new TableView<>();
-        codesAfterCompression.setMaxWidth(380);
+        TableView<CodesTableRow> codesAfterCompression = createTableView();
+        ObservableList<CodesTableRow> data = FXCollections.observableArrayList();
 
-        TableColumn<CodesTableRow, String> characterColumn = new TableColumn<>("Character");
-        characterColumn.setCellValueFactory(
-                new PropertyValueFactory<>("character"));
-
-        TableColumn<CodesTableRow, String> frequencyColumn = new TableColumn<>("Frequency");
-        frequencyColumn.setCellValueFactory(
-                new PropertyValueFactory<>("frequency"));
-
-        TableColumn<CodesTableRow, String> bitSequenceColumn = new TableColumn<>("Bit Sequence");
         AVLMap<Byte, Integer> frequencyTable = huffmanEncoder.getFrequencyTable();
-        bitSequenceColumn.setCellValueFactory(
-                new PropertyValueFactory<>("bitSequence"));
-
-        ObservableList<CodesTableRow> data =
-                FXCollections.observableArrayList();
+        AVLMap<Byte, String> huffmanCodes = huffmanEncoder.getHuffmanCodes();
 
         for (AVLMap.AVLNode<Byte, Integer> entry : frequencyTable.entrySet()) {
             byte character = entry.getKey();
             String frequency = String.valueOf(entry.getValue());
-            AVLMap<Byte, String> byteCodes = huffmanEncoder.getBytesCode();
-            String bitSequence = String.valueOf(byteCodes.get(character));
+            String bitSequence = huffmanCodes.get(character);
+
             data.add(new CodesTableRow((char) character, frequency, bitSequence));
         }
 
         codesAfterCompression.setItems(data);
-        codesAfterCompression.getColumns().addAll(characterColumn, frequencyColumn, bitSequenceColumn);
+        showTableViewInStage(codesAfterCompression, "Huffman Codes");
+    }
 
-        Stage compressedCodesStage = new Stage();
-        compressedCodesStage.setTitle("Compressed Codes");
-        compressedCodesStage.setWidth(350);
-        compressedCodesStage.setResizable(false);
-        compressedCodesStage.setScene(new Scene(new VBox(codesAfterCompression)));
-        compressedCodesStage.show();
+
+    private TableView<CodesTableRow> createTableView() {
+        TableView<CodesTableRow> tableView = new TableView<>();
+
+        TableColumn<CodesTableRow, String> characterColumn = new TableColumn<>("Character");
+        characterColumn.setCellValueFactory(new PropertyValueFactory<>("character"));
+
+        TableColumn<CodesTableRow, String> frequencyColumn = new TableColumn<>("Frequency");
+        frequencyColumn.setCellValueFactory(new PropertyValueFactory<>("frequency"));
+
+        TableColumn<CodesTableRow, String> bitSequenceColumn = new TableColumn<>("Bit Sequence");
+        bitSequenceColumn.setCellValueFactory(new PropertyValueFactory<>("bitSequence"));
+
+        tableView.getColumns().addAll(characterColumn, frequencyColumn, bitSequenceColumn);
+        return tableView;
+    }
+
+    private void showTableViewInStage(TableView<CodesTableRow> tableView, String title) {
+        Stage stage = new Stage();
+        stage.setTitle(title);
+        stage.setWidth(270);
+        stage.setScene(new Scene(new VBox(tableView)));
+        stage.show();
     }
 
     public void onRunClicked() {
@@ -483,9 +411,8 @@ public class HuffmanCoderController implements Initializable {
             huffmanTreeStage.show();
 
         } else {
-            showAlertMessage("Message", NO_COMPRESSION_DONE_MESSAGE, MESSAGE_STYLE);
+            showAlertMessage("Message", NO_COMPRESSION_DONE_MESSAGE);
         }
-
     }
 
     private void drawTree(Pane pane, TreeNode node, double x, double y, double hGap, int level) {
@@ -543,17 +470,19 @@ public class HuffmanCoderController implements Initializable {
             line.setStroke(LINE_COLOR);
             pane.getChildren().addAll(line, one);
             drawTree(pane, node.right(), rightX, rightY, hGap, level + 1);
-
         }
     }
 
-    void showAlertMessage(String title, String message, String messageStyle) {
+    void showAlertMessage(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
         Node content = alert.getDialogPane().lookup(".content");
-        content.setStyle(messageStyle);
+        content.setStyle( "-fx-font-weight: bold;" +
+                          "-fx-alignment: center-left;" +
+                          "-fx-font-size: 17px;" +
+                          "-fx-padding: 20px 20px 20px 5px;");
         alert.showAndWait();
     }
 }

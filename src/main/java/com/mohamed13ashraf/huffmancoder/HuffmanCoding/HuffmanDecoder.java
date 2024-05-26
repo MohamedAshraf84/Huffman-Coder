@@ -1,39 +1,69 @@
 package com.mohamed13ashraf.huffmancoder.HuffmanCoding;
 
 import com.mohamed13ashraf.huffmancoder.MyDataStructures.AVLMap;
+import java.util.BitSet;
 
 public class HuffmanDecoder {
 
+    private final int encodedMessageLength;
+    private final BitSet encodedMessageBitSet;
     private final TreeNode huffmanTree;
+    private final AVLMap<String, Byte> byteCodes;
 
-    private final AVLMap<String, Byte> originalBytes;
-
-
-    public HuffmanDecoder(TreeNode huffmanTree) {
-        this.huffmanTree = huffmanTree;
-        this.originalBytes = new AVLMap<>();
+    public HuffmanDecoder(HuffmanResult huffmanResult) {
+        this.encodedMessageLength = huffmanResult.encodedMessageLength();
+        this.encodedMessageBitSet = huffmanResult.encodedMessage();
+        this.huffmanTree = huffmanResult.huffmanTree();
+        this.byteCodes = new AVLMap<>();
     }
 
-    public AVLMap<String, Byte> decode()
+    public String decode()
     {
         if (huffmanTree == null)
-            return originalBytes;
+            return "";
 
-        getOriginalCodes(huffmanTree);
-
-        return originalBytes;
+        generateByteCodes();
+        return decodeMessage(convertBitSetToString());
     }
 
-    public void getOriginalCodes(TreeNode root)
+    public void generateByteCodes()
     {
-        preOrderTraversal(root, new StringBuilder());
+        preOrderTraversal(huffmanTree, new StringBuilder());
+    }
+
+    private String convertBitSetToString() {
+        StringBuilder encodedMessage = new StringBuilder();
+        for (int i = 0; i < encodedMessageLength; ++i) {
+            encodedMessage.append(encodedMessageBitSet.get(i) ? "1" : "0");
+        }
+        return encodedMessage.toString();
+    }
+
+    private String decodeMessage(String encodedMessage) {
+        StringBuilder message = new StringBuilder();
+        int currentLength = 1;
+        int start = 0;
+
+        while (start < encodedMessageLength) {
+            String key = encodedMessage.substring(start, start + currentLength);
+            if (byteCodes.containsKey(key)) {
+                byte ch = byteCodes.get(key);
+                message.append((char) ch);
+                start += currentLength;
+                currentLength = 1;
+                continue;
+            }
+            currentLength++;
+        }
+
+        return message.toString();
     }
 
     public void preOrderTraversal(TreeNode root, StringBuilder code)
     {
         if (root.isLeaf())
         {
-            originalBytes.put(code.toString(), root.character());
+            byteCodes.put(code.toString(), root.character());
             return;
         }
 
