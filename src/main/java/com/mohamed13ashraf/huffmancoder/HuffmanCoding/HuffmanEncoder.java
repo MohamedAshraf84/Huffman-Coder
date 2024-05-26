@@ -29,11 +29,6 @@ public class HuffmanEncoder {
         huffmanCodes = new AVLMap<>();
     }
 
-    private SinglyLinkedList<Byte> getMessageCharacters()
-    {
-        return messageCharacters;
-    }
-
     public TreeNode getHuffmanTree()
     {
         return huffmanTree;
@@ -74,7 +69,7 @@ public class HuffmanEncoder {
 
         return charactersSequence;
     }
-    
+
     private AVLMap<Byte, Integer> countCharactersFrequencies()
     {
         AVLMap<Byte, Integer> charsFrequency = new AVLMap<>();
@@ -103,7 +98,6 @@ public class HuffmanEncoder {
 
     private String encodeMessage() {
         StringBuilder encodedMessageBitSequence = new StringBuilder();
-        SinglyLinkedList<Byte> messageCharacters = getMessageCharacters();
 
         for (byte aChar : messageCharacters)
             encodedMessageBitSequence.append(huffmanCodes.get(aChar));
