@@ -5,27 +5,23 @@ import com.mohamed13ashraf.huffmancoder.MyDataStructures.SinglyLinkedList;
 import com.mohamed13ashraf.huffmancoder.MyDataStructures.MinimumHeap;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 
 public class HuffmanEncoder {
-    private final FileInputStream fileReader;
     private final SinglyLinkedList<Byte> messageCharacters;
     private final AVLMap<Byte, Integer> charsFrequency;
     private final MinimumHeap<TreeNode> charsFrequencyPQ;
     private final TreeNode huffmanTree;
     private final AVLMap<Byte, String> huffmanCodes;
 
+
     public HuffmanEncoder(File source) {
-        try {
-            fileReader = new FileInputStream(source);
-            messageCharacters = this.readCharactersFromFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        charsFrequency = this.countCharactersFrequencies();
-        charsFrequencyPQ = this.getCharactersPriorityQueue();
-        huffmanTree = this.buildHuffmanTree();
+        messageCharacters = readCharactersFromFile(source);
+        charsFrequency = countCharactersFrequencies();
+        charsFrequencyPQ = getCharactersPriorityQueue();
+        huffmanTree = buildHuffmanTree();
         huffmanCodes = new AVLMap<>();
     }
 
@@ -57,14 +53,16 @@ public class HuffmanEncoder {
         preOrderTraversal(curNode.right(), new StringBuilder(binCode).append("1"));
     }
 
-    private SinglyLinkedList<Byte> readCharactersFromFile() throws IOException {
+    private SinglyLinkedList<Byte> readCharactersFromFile(File source) {
         SinglyLinkedList<Byte> charactersSequence = new SinglyLinkedList<>();
 
-        int n = fileReader.available();
-        byte []oneByte;
-        for (int i = 0; i < n; ++i) {
-            oneByte = fileReader.readNBytes(1);
-            charactersSequence.add(oneByte[0]);
+        try ( BufferedReader bufferedReader = new BufferedReader(new FileReader(source)) ){
+            int ch;
+            while ((ch = bufferedReader.read()) != -1)
+                charactersSequence.add((byte) ch);
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         return charactersSequence;
