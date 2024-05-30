@@ -45,3 +45,15 @@ Double-click the HuffmanCoder.exe file.</br>
 1. Download the repository to your computer.<br>
 2. Open the application using an IDE like IntelliJ Idea or Eclipse.<br>
 3. Locate and run the main method inside the AppLauncher.java Class.<br>
+
+## Screenshots:
+<div align="center">
+  <img src="https://github.com/MohamedAshraf84/Huffman-Coder/blob/main/Screenshots/1.png">
+  <img src="https://github.com/MohamedAshraf84/Huffman-Coder/blob/main/Screenshots/3.png">
+  <img src="https://github.com/MohamedAshraf84/Huffman-Coder/blob/main/Screenshots/2.png">
+  <img src="https://github.com/MohamedAshraf84/Huffman-Coder/blob/main/Screenshots/4.png">
+</div>
+
+## Demonstration
+https://github.com/MohamedAshraf84/Huffman-Coder/assets/65142746/cf5aecb3-07ec-4324-8967-f803e96eaad4
+
